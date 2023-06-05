@@ -1,5 +1,4 @@
 const { Schema, model } = require("mongoose");
-
 const { handleMongooseError } = require("../helpers/");
 
 const projectSchema = new Schema(
@@ -7,8 +6,27 @@ const projectSchema = new Schema(
     name: {
       type: String,
       minlength: 3,
-      maxlength: 35,
+      maxlength: 100,
       required: [true, "Set name for project"],
+    },
+    codeURL: {
+      type: String,
+      required: [true, "Set link to code current project"],
+    },
+    livePageURL: {
+      type: String,
+    },
+    description: {
+      type: String,
+      minlength: 30,
+    },
+    titleURL: {
+      type: String,
+      // required: true,
+    },
+    favorite: {
+      type: Boolean,
+      default: false,
     },
 
     // owner: {
