@@ -1,7 +1,7 @@
 const Joi = require("joi");
 
-const emailRegex =
-  /^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/;
+// const emailRegex =
+//   /^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/;
 
 const joiProjectsSchema = Joi.object({
   name: Joi.string().min(3).max(100).required().messages({
@@ -25,4 +25,10 @@ const joiProjectsSchema = Joi.object({
   favorite: Joi.boolean(),
 });
 
-module.exports = { joiProjectsSchema };
+const joiUpdateStatusProjectSchema = Joi.object({
+  favorite: Joi.boolean()
+    .required()
+    .messages({ "any.required": "missing field favorite" }),
+});
+
+module.exports = { joiProjectsSchema, joiUpdateStatusProjectSchema };
