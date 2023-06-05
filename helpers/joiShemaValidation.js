@@ -1,7 +1,7 @@
 const Joi = require("joi");
 
-// const emailRegex =
-//   /^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/;
+const emailRegex =
+  /^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/;
 
 const joiProjectsSchema = Joi.object({
   name: Joi.string().min(3).max(100).required().messages({
@@ -31,4 +31,30 @@ const joiUpdateStatusProjectSchema = Joi.object({
     .messages({ "any.required": "missing field favorite" }),
 });
 
-module.exports = { joiProjectsSchema, joiUpdateStatusProjectSchema };
+const joiSignUpSchema = Joi.object({
+  name: Joi.string().min(3).max(35).required().messages({
+    "any.required": "Missing required 'name' field",
+    "string.min": "The length of 'name' must be between 3 and 35 characters",
+    "string.max": "The length of 'name' must be between 3 and 35 characters",
+  }),
+
+  email: Joi.string()
+    .pattern(new RegExp(emailRegex))
+    .required()
+    .messages({ "any.required": "Email is required" }),
+
+  password: Joi.string().min(6).required().messages({
+    "any.required": "Password is required",
+    "string.min": "The length of 'password' must be min 6 characters",
+  }),
+
+  // subscription: Joi.string()
+  //   .valid(...subscriptionList)
+  //   .default(subscriptionList[0]),
+});
+
+module.exports = {
+  joiProjectsSchema,
+  joiUpdateStatusProjectSchema,
+  joiSignUpSchema,
+};
