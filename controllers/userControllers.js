@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const { HttpError } = require("../helpers/");
 const User = require("../models/users");
 const controllerWrapper = require("../helpers/controllerWrapper");
+const assignTokens = require("../helpers/assignTokens");
 
 // *******************  /api/users  ******************
 
@@ -13,10 +14,6 @@ const signup = controllerWrapper(async (req, res) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  //   const avatarURL = gravatar.url(email, {
-  //     s: "250",
-  //   });
-  //   const verificationToken = nanoid();
 
   const newUser = await User.create({
     ...req.body,
@@ -31,10 +28,28 @@ const signup = controllerWrapper(async (req, res) => {
 });
 
 const login = controllerWrapper(async (req, res) => {
-  const { _id } = req.user;
-  await User.findByIdAndUpdate(_id, { token: "" });
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new HttpError(401, `Email or password invalid`);
+  }
 
-  res.status(204).json();
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    throw new HttpError(401, `Email or password invalid`);
+  }
+
+  const { accessToken, refreshToken } = assignTokens(user);
+  await User.findByIdAndUpdate(user._id, { refreshToken });
+
+  res.json({
+    accessToken,
+    user: {
+      name: user.name,
+      email: user.email,
+      subscription: user.subscription,
+    },
+  });
 });
 
 const logout = controllerWrapper(async (req, res) => {

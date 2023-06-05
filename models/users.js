@@ -29,24 +29,16 @@ const userSchema = new Schema(
       enum: subscriptionList,
       default: subscriptionList[0], // "free"
     },
-    refresh_token: {
+    refreshToken: {
       type: String,
-      default: "",
+      default: null,
     },
     avatarURL: {
       type: String,
-      // required: true,
+      default: null,
     },
-    // verify: {
-    //   type: Boolean,
-    //   default: false,
-    // },
-    // verificationToken: {
-    //   type: String,
-    //   default: null,
-    // required: [true, "Verify token is required"],
   },
-  //   },
+
   { versionKey: false, timestamps: true }
 );
 
