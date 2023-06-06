@@ -1,25 +1,42 @@
 const { HttpError } = require("../helpers");
 const jwt = require("jsonwebtoken");
 const User = require("../models/users");
-const { SECRET_KEY } = process.env;
+const { assignTokens } = require("../helpers");
+const { ACCESS_TOKEN_SECRET_KEY, REFRESH_TOKEN_SECRET_KEY } = process.env;
 
 const authenticate = async (req, res, next) => {
   const { authorization = "" } = req.headers;
   const [bearer, token] = authorization.split(" ");
-  if (bearer !== "Bearer") {
-    next(new HttpError(401, "Not authorized"));
+  if (bearer !== "Bearer" || !token) {
+    next(new HttpError(401, "Not authorized (invlid or absent token)"));
   }
 
+  const decoded = jwt.decode(token);
+  let user;
+
   try {
-    const { id } = jwt.verify(token, SECRET_KEY);
-    const user = await User.findById(id);
-    if (!user || !user.token || user.token !== token) {
+    user = await User.findById(decoded.userId);
+
+    if (!user || !user.refreshToken) {
       throw new HttpError(401, "Not authorized");
     }
+
+    jwt.verify(token, ACCESS_TOKEN_SECRET_KEY);
+
     req.user = user; // add user to request and  we will have this info in controller
     next();
-  } catch {
-    next(new HttpError(401, "Not authorized"));
+  } catch (err) {
+    if (err.name !== "TokenExpiredError")
+      return next(new HttpError(401, err.message || "Not authorized"));
+
+    try {
+      jwt.verify(user.refreshToken, REFRESH_TOKEN_SECRET_KEY);
+      const { accessToken, refreshToken } = assignTokens(user);
+      await User.findByIdAndUpdate(user.userId, { refreshToken });
+      res.json({ accessToken });
+    } catch (err) {
+      next(new HttpError(401, "refresh token is expired"));
+    }
   }
 };
 

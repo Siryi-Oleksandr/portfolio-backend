@@ -1,8 +1,6 @@
 const bcrypt = require("bcrypt");
-const { HttpError } = require("../helpers/");
+const { HttpError, controllerWrapper, assignTokens } = require("../helpers/");
 const User = require("../models/users");
-const controllerWrapper = require("../helpers/controllerWrapper");
-const assignTokens = require("../helpers/assignTokens");
 
 // *******************  /api/users  ******************
 

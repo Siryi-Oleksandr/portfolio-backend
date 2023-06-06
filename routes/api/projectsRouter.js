@@ -7,13 +7,15 @@ const {
   removeProject,
   updateStatusProject,
 } = require("../../controllers/projectControllers");
-const { isValidBody, isValidId } = require("../../middlewares");
+const { isValidBody, isValidId, authenticate } = require("../../middlewares");
 const {
   joiProjectsSchema,
   joiUpdateStatusProjectSchema,
 } = require("../../helpers/joiShemaValidation");
 
 const router = express.Router();
+
+router.use(authenticate); // checks user's authentication
 
 router.get("/", getProjects);
 router.get("/:projectId", isValidId, getProjectById);
