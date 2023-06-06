@@ -52,9 +52,9 @@ const login = controllerWrapper(async (req, res) => {
 
 const logout = controllerWrapper(async (req, res) => {
   const { _id } = req.user;
-  await User.findByIdAndUpdate(_id, { token: "" });
+  await User.findByIdAndUpdate(_id, { refreshToken: null });
 
-  res.status(204).json();
+  res.status(200).json({ message: "logout successfull" });
 });
 
 const updateStatusUser = controllerWrapper(async (req, res) => {
@@ -71,14 +71,15 @@ const updateStatusUser = controllerWrapper(async (req, res) => {
   });
 });
 
-// const getCurrent = controllerWrapper(async (req, res) => {
-//   const { email, subscription } = req.user;
-//   res.json({ email, subscription });
-// });
+const getCurrent = controllerWrapper(async (req, res) => {
+  const { name, email, subscription } = req.user;
+  res.json({ name, email, subscription });
+});
 
 module.exports = {
   signup,
   login,
   logout,
   updateStatusUser,
+  getCurrent,
 };

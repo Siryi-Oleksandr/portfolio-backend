@@ -19,7 +19,8 @@ const getProjectById = controllerWrapper(async (req, res) => {
 });
 
 const addProject = controllerWrapper(async (req, res) => {
-  const project = await Project.create({ ...req.body });
+  const { _id: owner } = req.user;
+  const project = await Project.create({ ...req.body, owner });
   res.status(201).json(project);
 });
 

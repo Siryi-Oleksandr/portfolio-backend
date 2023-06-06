@@ -8,13 +8,13 @@ const authenticate = async (req, res, next) => {
   const { authorization = "" } = req.headers;
   const [bearer, token] = authorization.split(" ");
   if (bearer !== "Bearer" || !token) {
-    next(new HttpError(401, "Not authorized (invlid or absent token)"));
+    return next(new HttpError(401, "Not authorized (invlid or absent token)"));
   }
 
-  const decoded = jwt.decode(token);
   let user;
 
   try {
+    const decoded = jwt.decode(token);
     user = await User.findById(decoded.userId);
 
     if (!user || !user.refreshToken) {
@@ -33,7 +33,8 @@ const authenticate = async (req, res, next) => {
       jwt.verify(user.refreshToken, REFRESH_TOKEN_SECRET_KEY);
       const { accessToken, refreshToken } = assignTokens(user);
       await User.findByIdAndUpdate(user.userId, { refreshToken });
-      res.json({ accessToken });
+      // res.json({ accessToken });
+      next();
     } catch (err) {
       next(new HttpError(401, "refresh token is expired"));
     }

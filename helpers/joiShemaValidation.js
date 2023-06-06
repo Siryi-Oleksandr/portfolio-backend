@@ -2,6 +2,7 @@ const Joi = require("joi");
 
 const emailRegex =
   /^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/;
+const subscriptionList = ["free", "pro", "premium"];
 
 const joiProjectsSchema = Joi.object({
   name: Joi.string().min(3).max(100).required().messages({
@@ -67,9 +68,19 @@ const joiLoginSchema = Joi.object({
   // token: Joi.string(),
 });
 
+const joiUpdateSubscriptionUser = Joi.object({
+  subscription: Joi.string()
+    .valid(...subscriptionList)
+    .required()
+    .messages({
+      "any.required": "Subscription field is required",
+    }),
+});
+
 module.exports = {
   joiProjectsSchema,
   joiUpdateStatusProjectSchema,
   joiSignUpSchema,
   joiLoginSchema,
+  joiUpdateSubscriptionUser,
 };
