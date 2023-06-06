@@ -33,8 +33,8 @@ const authenticate = async (req, res, next) => {
       jwt.verify(user.refreshToken, REFRESH_TOKEN_SECRET_KEY);
       const { accessToken, refreshToken } = assignTokens(user);
       await User.findByIdAndUpdate(user.userId, { refreshToken });
-      // res.json({ accessToken });
-      next();
+      res.json({ accessToken });
+      // next();
     } catch (err) {
       next(new HttpError(401, "refresh token is expired"));
     }

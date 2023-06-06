@@ -5,7 +5,20 @@ const controllerWrapper = require("../helpers/controllerWrapper");
 // *******************  /api/projects  ******************
 
 const getProjects = controllerWrapper(async (req, res) => {
-  const projects = await Project.find({});
+  const { _id: owner } = req.user;
+  const { page = 1, limit = 10, favorite } = req.query;
+  const skip = (page - 1) * limit;
+  const filter = { owner };
+  if (favorite === "true") {
+    filter.favorite = true;
+  }
+  if (favorite === "false") {
+    filter.favorite = false;
+  }
+  const projects = await Project.find(filter, "-createdAt -updatedAt", {
+    skip,
+    limit,
+  }).populate("owner", "email subscription");
   res.json(projects);
 });
 
