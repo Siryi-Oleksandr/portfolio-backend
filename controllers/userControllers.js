@@ -7,7 +7,6 @@ const {
 } = require("../helpers/");
 const User = require("../models/users");
 const gravatar = require("gravatar");
-const path = require("path");
 const fs = require("fs/promises");
 const Jimp = require("jimp");
 

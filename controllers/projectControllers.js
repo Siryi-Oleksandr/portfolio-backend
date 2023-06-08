@@ -81,6 +81,21 @@ const removeProject = controllerWrapper(async (req, res) => {
   res.json({ message: "project deleted" });
 });
 
+const updatePoster = controllerWrapper(async (req, res) => {
+  const { projectId } = req.params;
+  const { path: tempUpload } = req.file;
+
+  const fileData = await cloudinary.uploader.upload(tempUpload, {
+    folder: "posters",
+  });
+  await fs.unlink(tempUpload);
+  // TODO delete old poster on claudinary/////////////////////////////////////////////////
+  await Project.findByIdAndUpdate(projectId, { posterURL: fileData.url });
+  res.json({
+    posterURL: fileData.url,
+  });
+});
+
 module.exports = {
   getProjects,
   addProject,
@@ -88,4 +103,5 @@ module.exports = {
   updateProject,
   removeProject,
   updateStatusProject,
+  updatePoster,
 };

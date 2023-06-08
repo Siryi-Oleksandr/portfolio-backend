@@ -6,6 +6,7 @@ const {
   updateProject,
   removeProject,
   updateStatusProject,
+  updatePoster,
 } = require("../../controllers/projectControllers");
 const {
   isValidBody,
@@ -41,6 +42,12 @@ router.patch(
   isValidId,
   isValidBody(joiUpdateStatusProjectSchema),
   updateStatusProject
+);
+router.patch(
+  "/:projectId/posters",
+  isValidId,
+  upload.single("poster"),
+  updatePoster
 );
 router.delete("/:projectId", isValidId, removeProject);
 
