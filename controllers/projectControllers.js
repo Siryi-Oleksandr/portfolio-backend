@@ -1,4 +1,4 @@
-const path = require("path");
+// const path = require("path");
 const fs = require("fs/promises");
 const { HttpError, controllerWrapper, cloudinary } = require("../helpers/");
 const Project = require("../models/project");
@@ -40,6 +40,7 @@ const addProject = controllerWrapper(async (req, res) => {
     folder: "posters",
   });
   await fs.unlink(tempUpload);
+
   const project = await Project.create({
     ...req.body,
     owner,

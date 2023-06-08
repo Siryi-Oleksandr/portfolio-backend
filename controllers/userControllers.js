@@ -1,6 +1,15 @@
 const bcrypt = require("bcrypt");
-const { HttpError, controllerWrapper, assignTokens } = require("../helpers/");
+const {
+  HttpError,
+  controllerWrapper,
+  assignTokens,
+  cloudinary,
+} = require("../helpers/");
 const User = require("../models/users");
+const gravatar = require("gravatar");
+const path = require("path");
+const fs = require("fs/promises");
+const Jimp = require("jimp");
 
 // *******************  /api/users  ******************
 
@@ -12,10 +21,14 @@ const signup = controllerWrapper(async (req, res) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
+  const avatarURL = gravatar.url(email, {
+    s: "250",
+  });
 
   const newUser = await User.create({
     ...req.body,
     password: hashedPassword,
+    avatarURL,
   });
 
   res.status(201).json({
@@ -78,10 +91,7 @@ const getCurrent = controllerWrapper(async (req, res) => {
 
 const updateAvatar = controllerWrapper(async (req, res) => {
   const { _id } = req.user;
-  const { path: tempUpload, originalname } = req.file;
-
-  const fileName = `${_id}_${originalname}`;
-  const resultUpload = path.join(avatarsDir, fileName);
+  const { path: tempUpload } = req.file;
 
   const image = await Jimp.read(tempUpload);
   await image
@@ -89,14 +99,15 @@ const updateAvatar = controllerWrapper(async (req, res) => {
     .cover(250, 250, Jimp.HORIZONTAL_ALIGN_CENTER || Jimp.VERTICAL_ALIGN_MIDDLE)
     .write(tempUpload);
 
-  await fs.rename(tempUpload, resultUpload);
-  // await fs.unlink(path.join(tempUpload, originalname));
+  const fileData = await cloudinary.uploader.upload(tempUpload, {
+    folder: "avatars",
+  });
+  await fs.unlink(tempUpload);
 
-  const avatarURL = path.join("avatars", fileName);
-  await User.findByIdAndUpdate(_id, { avatarURL });
+  await User.findByIdAndUpdate(_id, { avatarURL: fileData.url });
 
   res.json({
-    avatarURL,
+    avatarURL: fileData.url,
   });
 });
 

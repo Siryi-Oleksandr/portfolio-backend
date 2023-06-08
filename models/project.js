@@ -22,7 +22,7 @@ const projectSchema = new Schema(
     },
     posterURL: {
       type: String,
-      // required: true,
+      default: null,
     },
     favorite: {
       type: Boolean,

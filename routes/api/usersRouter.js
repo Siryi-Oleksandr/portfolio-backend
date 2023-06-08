@@ -5,8 +5,9 @@ const {
   logout,
   updateStatusUser,
   getCurrent,
+  updateAvatar,
 } = require("../../controllers/userControllers");
-const { isValidBody, authenticate } = require("../../middlewares");
+const { isValidBody, authenticate, upload } = require("../../middlewares");
 const {
   joiSignUpSchema,
   joiLoginSchema,
@@ -25,5 +26,6 @@ router.put(
   updateStatusUser
 );
 router.get("/current", authenticate, getCurrent);
+router.patch("/avatars", authenticate, upload.single("avatar"), updateAvatar);
 
 module.exports = router;
