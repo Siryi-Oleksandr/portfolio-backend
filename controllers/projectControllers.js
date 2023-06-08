@@ -1,6 +1,7 @@
-const { HttpError } = require("../helpers/");
+const path = require("path");
+const fs = require("fs/promises");
+const { HttpError, controllerWrapper, cloudinary } = require("../helpers/");
 const Project = require("../models/project");
-const controllerWrapper = require("../helpers/controllerWrapper");
 
 // *******************  /api/projects  ******************
 
@@ -32,12 +33,20 @@ const getProjectById = controllerWrapper(async (req, res) => {
 });
 
 const addProject = controllerWrapper(async (req, res) => {
-  console.log(req.body);
-  console.log(req.file);
-  // const { _id: owner } = req.user;
-  // const project = await Project.create({ ...req.body, owner });
-  // res.status(201).json(project);
-  res.status(201).send("Project created successfully");
+  const { _id: owner } = req.user;
+  const { path: tempUpload } = req.file;
+
+  const fileData = await cloudinary.uploader.upload(tempUpload, {
+    folder: "posters",
+  });
+  await fs.unlink(tempUpload);
+  const project = await Project.create({
+    ...req.body,
+    owner,
+    posterURL: fileData.url,
+  });
+
+  res.status(201).json(project);
 });
 
 const updateProject = controllerWrapper(async (req, res) => {

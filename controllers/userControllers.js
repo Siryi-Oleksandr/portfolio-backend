@@ -76,10 +76,35 @@ const getCurrent = controllerWrapper(async (req, res) => {
   res.json({ name, email, subscription });
 });
 
+const updateAvatar = controllerWrapper(async (req, res) => {
+  const { _id } = req.user;
+  const { path: tempUpload, originalname } = req.file;
+
+  const fileName = `${_id}_${originalname}`;
+  const resultUpload = path.join(avatarsDir, fileName);
+
+  const image = await Jimp.read(tempUpload);
+  await image
+    .autocrop()
+    .cover(250, 250, Jimp.HORIZONTAL_ALIGN_CENTER || Jimp.VERTICAL_ALIGN_MIDDLE)
+    .write(tempUpload);
+
+  await fs.rename(tempUpload, resultUpload);
+  // await fs.unlink(path.join(tempUpload, originalname));
+
+  const avatarURL = path.join("avatars", fileName);
+  await User.findByIdAndUpdate(_id, { avatarURL });
+
+  res.json({
+    avatarURL,
+  });
+});
+
 module.exports = {
   signup,
   login,
   logout,
   updateStatusUser,
   getCurrent,
+  updateAvatar,
 };
