@@ -20,7 +20,7 @@ const projectSchema = new Schema(
       type: String,
       minlength: 30,
     },
-    titleURL: {
+    poster: {
       type: String,
       // required: true,
     },

@@ -7,7 +7,12 @@ const {
   removeProject,
   updateStatusProject,
 } = require("../../controllers/projectControllers");
-const { isValidBody, isValidId, authenticate } = require("../../middlewares");
+const {
+  isValidBody,
+  isValidId,
+  authenticate,
+  upload,
+} = require("../../middlewares");
 const {
   joiProjectsSchema,
   joiUpdateStatusProjectSchema,
@@ -19,7 +24,12 @@ router.use(authenticate); // checks user's authentication
 
 router.get("/", getProjects);
 router.get("/:projectId", isValidId, getProjectById);
-router.post("/", isValidBody(joiProjectsSchema), addProject);
+router.post(
+  "/",
+  upload.single("poster"),
+  isValidBody(joiProjectsSchema),
+  addProject
+);
 router.put(
   "/:projectId",
   isValidId,
