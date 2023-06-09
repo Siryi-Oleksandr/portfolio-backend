@@ -1,7 +1,9 @@
 // const path = require("path");
 const fs = require("fs/promises");
-const { HttpError, controllerWrapper, cloudinary } = require("../helpers/");
+const { HttpError, controllerWrapper, CloudinaryAPI } = require("../helpers/");
 const Project = require("../models/project");
+
+const cloudinaryAPI = new CloudinaryAPI("posters"); // create a new istance object from Cloudinary API
 
 // *******************  /api/projects  ******************
 
@@ -36,9 +38,7 @@ const addProject = controllerWrapper(async (req, res) => {
   const { _id: owner } = req.user;
   const { path: tempUpload } = req.file;
 
-  const fileData = await cloudinary.uploader.upload(tempUpload, {
-    folder: "posters",
-  });
+  const fileData = await cloudinaryAPI.upload(tempUpload);
   await fs.unlink(tempUpload);
 
   const project = await Project.create({
@@ -91,14 +91,12 @@ const updatePoster = controllerWrapper(async (req, res) => {
     throw new HttpError(404, `Project with ${projectId} not found`);
   }
 
-  const fileData = await cloudinary.uploader.upload(tempUpload, {
-    folder: "posters",
-  });
+  const fileData = await cloudinaryAPI.upload(tempUpload);
   await fs.unlink(tempUpload);
-  // TODO delete old poster on claudinary/////////////////////////////////////////////////
-  await cloudinary.uploader.destroy(project.posterID);
+  if (project.posterID) {
+    await cloudinaryAPI.delete(project.posterID);
+  }
 
-  // TODO finish upload////////////////////////////////////////////////
   await Project.findByIdAndUpdate(projectId, {
     posterURL: fileData.url,
     posterID: fileData.public_id,

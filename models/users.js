@@ -37,6 +37,10 @@ const userSchema = new Schema(
       type: String,
       default: null,
     },
+    avatarID: {
+      type: String,
+      default: null,
+    },
   },
 
   { versionKey: false, timestamps: true }

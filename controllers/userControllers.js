@@ -3,12 +3,14 @@ const {
   HttpError,
   controllerWrapper,
   assignTokens,
-  cloudinary,
+  CloudinaryAPI,
 } = require("../helpers/");
 const User = require("../models/users");
 const gravatar = require("gravatar");
 const fs = require("fs/promises");
 const Jimp = require("jimp");
+
+const cloudinaryAPI = new CloudinaryAPI("avatars"); // create a new istance object from Cloudinary API
 
 // *******************  /api/users  ******************
 
@@ -90,18 +92,27 @@ const updateAvatar = controllerWrapper(async (req, res) => {
   const { _id } = req.user;
   const { path: tempUpload } = req.file;
 
+  const user = await User.findById(_id);
+  if (!user) {
+    throw new HttpError(404, `Project with ${_id} not found`);
+  }
+
   const image = await Jimp.read(tempUpload);
   image
     .autocrop()
     .cover(250, 250, Jimp.HORIZONTAL_ALIGN_CENTER || Jimp.VERTICAL_ALIGN_MIDDLE)
     .write(tempUpload);
 
-  const fileData = await cloudinary.uploader.upload(tempUpload, {
-    folder: "avatars",
-  });
+  const fileData = await cloudinaryAPI.upload(tempUpload);
   await fs.unlink(tempUpload);
+  if (user.avatarID) {
+    await cloudinaryAPI.delete(user.avatarID);
+  }
 
-  await User.findByIdAndUpdate(_id, { avatarURL: fileData.url });
+  await User.findByIdAndUpdate(_id, {
+    avatarURL: fileData.url,
+    avatarID: fileData.public_id,
+  });
 
   res.json({
     avatarURL: fileData.url,
