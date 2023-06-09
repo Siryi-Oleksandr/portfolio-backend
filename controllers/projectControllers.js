@@ -45,6 +45,7 @@ const addProject = controllerWrapper(async (req, res) => {
     ...req.body,
     owner,
     posterURL: fileData.url,
+    posterID: fileData.public_id,
   });
 
   res.status(201).json(project);
@@ -85,12 +86,23 @@ const updatePoster = controllerWrapper(async (req, res) => {
   const { projectId } = req.params;
   const { path: tempUpload } = req.file;
 
+  const project = await Project.findById(projectId);
+  if (!project) {
+    throw new HttpError(404, `Project with ${projectId} not found`);
+  }
+
   const fileData = await cloudinary.uploader.upload(tempUpload, {
     folder: "posters",
   });
   await fs.unlink(tempUpload);
   // TODO delete old poster on claudinary/////////////////////////////////////////////////
-  await Project.findByIdAndUpdate(projectId, { posterURL: fileData.url });
+  await cloudinary.uploader.destroy(project.posterID);
+
+  // TODO finish upload////////////////////////////////////////////////
+  await Project.findByIdAndUpdate(projectId, {
+    posterURL: fileData.url,
+    posterID: fileData.public_id,
+  });
   res.json({
     posterURL: fileData.url,
   });

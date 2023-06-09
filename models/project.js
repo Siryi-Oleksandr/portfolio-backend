@@ -24,6 +24,10 @@ const projectSchema = new Schema(
       type: String,
       default: null,
     },
+    posterID: {
+      type: String,
+      default: null,
+    },
     favorite: {
       type: Boolean,
       default: false,

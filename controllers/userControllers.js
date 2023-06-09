@@ -78,9 +78,7 @@ const updateStatusUser = controllerWrapper(async (req, res) => {
     { new: true }
   );
 
-  res.json({
-    user,
-  });
+  res.json({ user });
 });
 
 const getCurrent = controllerWrapper(async (req, res) => {
@@ -93,7 +91,7 @@ const updateAvatar = controllerWrapper(async (req, res) => {
   const { path: tempUpload } = req.file;
 
   const image = await Jimp.read(tempUpload);
-  await image
+  image
     .autocrop()
     .cover(250, 250, Jimp.HORIZONTAL_ALIGN_CENTER || Jimp.VERTICAL_ALIGN_MIDDLE)
     .write(tempUpload);
